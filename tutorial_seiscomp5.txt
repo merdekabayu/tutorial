@@ -1,0 +1,103 @@
+Tutorial Instalasi WSL (Windows Subsystem for Linux) di Windows 11/10
+
+1. Atur Setting WSL di Windows di Control Panel
+	-> Control Panel > Programs > Programs and Features > Turn Windows Features on or off
+	-> Check/Centang pada bagian Virtual Machine Platform dan Windows Subsystem for Linux
+	-> Pilih OK
+	-> Apabila ada opsi restart, maka restart PC terlebih dahulu
+
+2. Download Ubuntu di Windows Store
+	-> Buka Microsoft Store di Windows
+	-> Cari Ubuntu
+	-> Pilih dan Download Ubuntu
+	-> Tunggu proses download dan instalasi selesai
+
+3. Update WSL di Powershell
+	-> Buka Windows Powershell sebagai administrator
+	>> wsl.exe --Install
+	>> wsl.exe --Update
+
+4. Setting user password Ubuntu	
+	-> Unix username : sysop
+	-> Password : *******
+
+5. Lakukan update dan upgrade ubuntu untuk pertama kalinya
+	>> sudo apt update
+	>> sudo apt upgrade -y
+
+
+
+Tutorial Instalasi Seiscomp5 di WSL (Windows Subsystem for Linux)
+
+
+1. Download file seiscomp dan maps di website Seiscomp
+	
+	https://www.seiscomp.de/downloader/
+	
+	*sesuaikan dengan versi ubuntu, untuk cek versi ketik
+		>> lsb_release -a
+	
+	
+2. Letakkan file tersebut di Ubuntu /home/sysop/:
+	seiscomp-5.5.7-ubuntu22.04-x86_64.tar.gz
+	seiscomp-maps.tar.gz
+
+3. ekstrak file seiscomp-5.5.7-ubuntu22.04-x86_64.tar.gz
+	>> tar zxvf seiscomp-5.5.7-ubuntu22.04-x86_64.tar.gz
+	
+4. ekstrak file seiscomp-maps.tar.gz
+	>> tar zxvf seiscomp-maps.tar.gz
+	
+5. Instal dependency untuk seiscomp
+	>> cd ~/seiscomp/share/deps/ubuntu/22.04/
+	>> sudo sh ./install-base.sh
+	>> sudo sh ./install-gui.sh
+	>> sudo sh ./install-mariadb-server.sh
+	>> sudo sh ./install-fdsnws.sh
+	
+	Setting password mysql untuk Ubuntu 22.04
+		>> sudo systemctl stop mysql.service
+		>> sudo systemctl set-environment MYSQLD_OPTS="--skip-networking --skip-grant-tables"
+		>> sudo systemctl start mysql.service
+		>> sudo mysql -u root
+			mysql> flush privileges;
+			mysql> USE mysql;
+			mysql> ALTER USER 'root'@'localhost' IDENTIFIED BY 'root';
+			mysql> quit;
+		
+		>> sudo systemctl unset-environment MYSQLD_OPTS
+		>> sudo systemctl revert mysql
+		>> sudo killall -u mysql
+		>> sudo systemctl restart mysql.service
+	tes password mysql
+		>> sudo mysql -u root -p
+			Enter Password: root
+	apabila sudah berhasil login ke mysql maka telah sukses.
+	
+	
+6. Print enviroment ke bashrc
+	>> cd ~/seiscomp/bin
+	>> ./seiscomp print env >> ~/.bashrc
+	>> soruce ~/.bashrc
+	
+	
+7. Jalankan Seiscomp Configuration
+	>> scconfig
+	1. Isi agency id, Datacenter ID, Organization string = BMKG
+	2. enable database storage
+	3. centang mysql
+	4. Create database
+	5. Isi mysql root password dengan 'root'
+	6. Drop exiting database
+	7. Database name = seiscomp
+	8. Database hostname = localhost
+	9. Database read-write user = sysop
+	10. Database read-write password = sysop
+	11. Database public hostname = localhost
+	12. Database read-only user = sysop
+	13. Database read-only password = sysop
+	14. Next --> finish 
+	15. Tunggu hingga tidak ada error
+		"Setup run successfully"
+	16. Lalu close
+	
